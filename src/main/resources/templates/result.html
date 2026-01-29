@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>비바술사 - 결과</title>
+  <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" />
+  <style>
+    body {
+      margin: 0; padding: 0; background-color: #e9ecef;
+      font-family: 'Pretendard', sans-serif;
+      display: flex; justify-content: center; align-items: center; min-height: 100vh;
+    }
+
+    /* 메인 카드 컨테이너 */
+    .result-card {
+      background: white; width: 90%; max-width: 380px;
+      border-radius: 15px; overflow: hidden;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+      margin: 20px 0;
+      position: relative;
+    }
+
+    /* 상단 헤더 (보라색) */
+    .card-header {
+      background-color: #5B36AC; color: white;
+      text-align: center; padding: 15px; font-weight: bold; font-size: 16px;
+    }
+
+    /* 본문 영역 */
+    .card-body { padding: 30px 20px; text-align: center; }
+
+    /* 메인 메시지 */
+    .main-message {
+      font-size: 20px; font-weight: 800; color: #333;
+      line-height: 1.5; margin-bottom: 25px; word-break: keep-all;
+    }
+
+    /* 믿음 태그  */
+    .belief-tag {
+      display: inline-block; background-color: #f3f0ff; color: #5B36AC;
+      padding: 8px 15px; border-radius: 8px; font-size: 14px; font-weight: 600;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .belief-tag:hover { background-color: #e0d4fc; }
+
+    /* 숨겨진 의미 박스 */
+    .belief-detail-box {
+      display: none;
+      background-color: #f8f9fa;
+      border: 1px solid #eee;
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 30px;
+      text-align: left;
+      font-size: 13px;
+      line-height: 1.6;
+      color: #555;
+      animation: slideDown 0.3s ease-out;
+    }
+    .belief-detail-item { margin-bottom: 8px; }
+    .belief-label { font-weight: bold; color: #5B36AC; margin-right: 5px; }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 생각해보기 섹션 */
+    .section-title { font-size: 14px; color: #888; margin-bottom: 10px; font-weight: bold; }
+    .question-text {
+      font-size: 16px; color: #444; margin-bottom: 30px; word-break: keep-all;
+    }
+
+    /* 행운템 박스 (노란색) */
+    .lucky-box {
+      background-color: #fff9db; color: #444;
+      padding: 15px; border-radius: 10px; font-weight: bold;
+      margin-bottom: 30px;
+    }
+    .lucky-icon { margin-right: 5px; color: #2ecc71; }
+
+    /* 댓글(소감) 영역 */
+    .comment-section {
+      border-top: 1px solid #eee; padding: 20px; text-align: left;
+      background-color: #fafafa;
+    }
+    .comment-title {
+      font-size: 13px; font-weight: bold; color: #666; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .empty-comment { font-size: 12px; color: #aaa; margin-bottom: 15px; }
+
+    /* 입력창 스타일 */
+    .input-group { display: flex; gap: 5px; }
+    .comment-input {
+      flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 13px;
+    }
+    .btn-submit {
+      background-color: #333; color: white; border: none;
+      padding: 0 15px; border-radius: 5px; font-size: 13px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<div class="result-card">
+  <div class="card-header">오늘의 비바술사 계시</div>
+
+  <div class="card-body">
+    <div class="main-message" th:text="${fortune.message}">
+      남들은 마침표를 찍을 때 당신은<br>물음표를 던지는 하루입니다.
+    </div>
+
+    <div class="belief-tag" onclick="toggleBelief()">
+      📌 <span th:text="${fortune.belief.title}">당연한 것도 낯설게 본다</span> 🔽
+    </div>
+
+    <div id="beliefDetail" class="belief-detail-box">
+      <div class="belief-detail-item">
+        <span class="belief-label">[의미]</span>
+        <span th:text="${fortune.belief.meaning}">남들이 보지 못하는...</span>
+      </div>
+    </div>
+
+    <div class="section-title">🤔 생각해보기</div>
+    <div class="question-text" th:text="${fortune.question}">
+      오늘 '왜?'라는 질문을 몇 번 하셨나요?
+    </div>
+
+    <div class="lucky-box">
+      <span class="lucky-icon">🍀</span> 행운템: <span th:text="${fortune.luckyItem}">물음표 스티커</span>
+    </div>
+  </div>
+
+  <div class="comment-section">
+    <div class="comment-title">💬 '<span th:text="${fortune.belief.title}"></span>' 동료들의 한마디</div>
+
+    <div class="empty-comment" th:if="${#lists.isEmpty(comments)}">
+      오늘 하루, 이 믿음을 어떻게 실천해볼까요?
+    </div>
+
+    <ul th:if="${!#lists.isEmpty(comments)}" style="list-style: none; padding: 0; margin-bottom: 15px;">
+      <li th:each="comment : ${comments}" style="font-size: 13px; margin-bottom: 5px; color: #444;">
+        • <span th:text="${comment.content}">소감 내용</span>
+      </li>
+    </ul>
+
+    <form action="/fortune/comment" method="post" class="input-group">
+      <input type="hidden" name="beliefId" th:value="${fortune.belief.id}">
+      <input type="text" name="content" class="comment-input" placeholder="소감을 남겨주세요 (30자 이내)">
+      <button type="submit" class="btn-submit">등록</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // 태그 클릭 시 설명 박스를 껐다 켰다 하는 함수
+  function toggleBelief() {
+    var box = document.getElementById("beliefDetail");
+    if (box.style.display === "none" || box.style.display === "") {
+      box.style.display = "block"; // 보이기
+    } else {
+      box.style.display = "none";
+    }
+  }
+</script>
+
+</body>
+</html>
